@@ -50,6 +50,8 @@ def is_source(filename):
 def process_line(line):
     global class_name
 
+    line = re.sub('([^\w]+)(from)([^\w]+)', '\\1_from\\3', line)
+
     """ remove semicolons
 
         codecode(param, param);
