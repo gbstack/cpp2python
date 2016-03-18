@@ -37,6 +37,9 @@ import sys
 import os.path
 import re
 
+class_lines = {'_function_':[]}
+class_name = None
+
 def is_source(filename):
     suffixes = ('.cpp', '.c', '.cxx', '.c++', '.cc', '.h', '.hpp', '.hxx', '.h++')
     for s in suffixes:
@@ -45,6 +48,7 @@ def is_source(filename):
     return False
 
 def process_line(line):
+    global class_name
 
     """ remove semicolons
 
@@ -187,6 +191,13 @@ def process_line(line):
         -bool pMonkeyStudio::isSameFile( const QString& left, const QString& right )
         +pMonkeyStudio::isSameFile( const QString& left, const QString& right ):
     """
+
+    matches = re.findall('^[\w:&<>\*]+\s+((\w+)::)?(\w+)\(([^\)]*\))$', line)
+    if len(matches) > 0:
+        class_name = matches[0][1]
+        if not class_lines.has_key(class_name):
+            class_lines[class_name] = []
+        print class_name, matches
     line = re.sub('^[\w:&<>\*]+\s+([\w:]+)\(([^\)]*\))$', 'def \\1(self, \\2:', line)
 
     """ after previous replacement fix "(self, )" to "(self)"
@@ -279,7 +290,12 @@ def process_line(line):
                 'S[A-Z]+\s*\(\s*([\w\d]+)[^\)]+\)\s*\)\s*\)',
               '\\1.\\2.connect(\\3.\\4)', line)
 
-    return line
+    if class_name is not None:
+        # because in above code there are many rules which will produce empty lines, and they will produce incorrect identation in generated code
+        if len(line)>0:
+            class_lines[class_name].append(line)
+    else:
+        class_lines['_function_'].append(line)
 
 def process_file(in_filename, out_filename):
     """
@@ -289,8 +305,12 @@ def process_file(in_filename, out_filename):
         lines = file.readlines()  # probably would die on sources more than 100 000 lines :D
     with open(out_filename, 'w+') as file:
         for line in lines:
-            file.write(process_line(line))
-
+            process_line(line)
+        for c in class_lines.keys():
+            file.write('class %s:\r\n' % c)
+            for line in class_lines[c]:
+                file.write('  '+line)
+    print class_lines
 
 def main():
     if '--help' in sys.argv or \
