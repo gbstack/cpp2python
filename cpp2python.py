@@ -323,7 +323,7 @@ def main():
         print(help)
         sys.exit(0)
     if len (sys.argv) != 2:
-        print('Invalid parameters count. Must be 1', file=sys.stderr)
+        print >> sys.stderr, 'Invalid parameters count. Must be 1'
         print(help)
         sys.exit(-1)
     if os.path.isdir(sys.argv[1]):
@@ -336,7 +336,7 @@ def main():
     elif os.path.isfile(sys.argv[1]):
         process_file(sys.argv[1], sys.argv[1] + '.py')
     else:
-        print('Not a file or directory', sys.argv[1], file=sys.stderr)
+        print >> sys.stderr, 'Not a file or directory', sys.argv[1]
         sys.exit(-1)
 
 if __name__ == '__main__':
