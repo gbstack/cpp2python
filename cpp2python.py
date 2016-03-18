@@ -235,6 +235,9 @@ def process_line(line):
     """
     line = re.sub('::', '.', line)
 
+    # remove & (reference opeartor or address-of opeartor)
+    line = re.sub('&', '', line)
+
     """ replace 'else if' with 'elif'
 
         else if (blabla)
