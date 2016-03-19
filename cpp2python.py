@@ -273,6 +273,9 @@ def process_line(line):
     """
     line = re.sub('([^\w])this([^\w])', '\\1self\\2', line)
 
+    # convert for loop to while loop (need improvement: indentation, the third part cannot include another parentheses)
+    line = re.sub('(\s*)for\s*\(([^;]*?);([^;]*?);\s*([^\)]*?)\)', '\\1# generated while loop\n\\1  \\2\n\\1  while(\\3):\n\\1      \\4', line)
+
     """ Replace Qt foreach macro with Python for
         -foreach ( QMdiSubWindow* window, a.subWindowList() )
         +foreach ( QMdiSubWindow* window, a.subWindowList() )
